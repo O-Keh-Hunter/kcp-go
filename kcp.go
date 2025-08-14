@@ -223,6 +223,51 @@ type ackItem struct {
 	ts uint32
 }
 
+// NsndQueue 返回发送队列中的消息数量
+func (kcp *KCP) NsndQueue() int {
+	return kcp.snd_queue.Len()
+}
+
+// NrcvQueue 返回接收队列中的消息数量
+func (kcp *KCP) NrcvQueue() int {
+	return kcp.rcv_queue.Len()
+}
+
+// NsndBuf 返回发送缓冲区中的消息数量
+func (kcp *KCP) NsndBuf() int {
+	return kcp.snd_buf.Len()
+}
+
+// NrcvBuf 返回接收缓冲区中的消息数量
+func (kcp *KCP) NrcvBuf() int {
+	return kcp.rcv_buf.Len()
+}
+
+// GetMtu returns the MTU value
+func (kcp *KCP) GetMtu() uint32 {
+	return kcp.mtu
+}
+
+// GetSndWnd returns the send window size
+func (kcp *KCP) GetSndWnd() uint32 {
+	return kcp.snd_wnd
+}
+
+// GetRcvWnd returns the receive window size
+func (kcp *KCP) GetRcvWnd() uint32 {
+	return kcp.rcv_wnd
+}
+
+// GetInterval returns the interval value
+func (kcp *KCP) GetInterval() uint32 {
+	return kcp.interval
+}
+
+func (k *KCP) GetState() int               { return int(k.state) }
+func (k *KCP) GetDeadLink() uint32         { return k.dead_link }
+func (k *KCP) SetDeadLink(deadlink uint32) { k.dead_link = deadlink }
+func (k *KCP) ClearSndQueue()              { k.snd_queue.Clear() }
+
 // NewKCP create a new kcp state machine
 //
 // 'conv' must be equal in the connection peers, or else data will be silently rejected.
