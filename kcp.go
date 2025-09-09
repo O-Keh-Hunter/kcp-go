@@ -223,6 +223,97 @@ type ackItem struct {
 	ts uint32
 }
 
+// NsndQueue returns the number of messages currently in the send queue.
+// These are messages waiting to be moved into the send buffer.
+func (kcp *KCP) NsndQueue() int {
+	return kcp.snd_queue.Len()
+}
+
+// NrcvQueue returns the number of messages currently in the receive queue.
+// These are messages that have been fully received and are ready for the application.
+func (kcp *KCP) NrcvQueue() int {
+	return kcp.rcv_queue.Len()
+}
+
+// NsndBuf returns the number of segments currently in the send buffer.
+// These are messages that have been sent but not yet acknowledged.
+func (kcp *KCP) NsndBuf() int {
+	return kcp.snd_buf.Len()
+}
+
+// NrcvBuf returns the number of segments currently in the receive buffer.
+// These are out-of-order messages waiting to be moved into the receive queue.
+func (kcp *KCP) NrcvBuf() int {
+	return kcp.rcv_buf.Len()
+}
+
+// GetMtu returns the current MTU (Maximum Transmission Unit) value used by KCP.
+// This represents the maximum size of a UDP packet that can be sent.
+func (kcp *KCP) GetMtu() uint32 {
+	return kcp.mtu
+}
+
+// GetSndWnd returns the configured send window size.
+// This is the maximum number of unacknowledged segments that can be in-flight.
+func (kcp *KCP) GetSndWnd() uint32 {
+	return kcp.snd_wnd
+}
+
+// GetRcvWnd returns the configured receive window size.
+// This is the maximum number of segments that can be received without acknowledgment.
+func (kcp *KCP) GetRcvWnd() uint32 {
+	return kcp.rcv_wnd
+}
+
+// GetRmtWnd returns the latest remote (peer) window size advertised by the other side.
+// This indicates how many more segments the peer can currently receive.
+func (kcp *KCP) GetRmtWnd() uint32 {
+	return kcp.rmt_wnd
+}
+
+// GetMss returns the maximum segment size (MSS) used by KCP.
+// This is derived from the MTU minus protocol overhead.
+func (kcp *KCP) GetMss() uint32 {
+	return kcp.mss
+}
+
+// GetInterval returns the KCP update interval in milliseconds.
+// This controls how frequently the protocol state is updated.
+func (kcp *KCP) GetInterval() uint32 {
+	return kcp.interval
+}
+
+// GetState returns the current connection state of KCP.
+// This is mainly used for debugging and state tracking.
+func (k *KCP) GetState() int {
+	return int(k.state)
+}
+
+// GetDeadLink returns the dead link threshold.
+// If a segment is retransmitted more times than this threshold, the connection is considered dead.
+func (k *KCP) GetDeadLink() uint32 {
+	return k.dead_link
+}
+
+// SetDeadLink sets the dead link threshold.
+// This defines how many retransmissions are allowed before considering the connection dead.
+func (k *KCP) SetDeadLink(deadlink uint32) {
+	k.dead_link = deadlink
+}
+
+// ClearSndQueue clears all messages from the send queue.
+// Use with caution: queued but unsent messages will be lost.
+func (k *KCP) ClearSndQueue() {
+	k.snd_queue.Clear()
+}
+
+// Flush forces an immediate flush of pending data and ACKs.
+// If ackOnly is true, only ACKs are flushed without sending new data.
+// Returns the number of bytes sent during the flush.
+func (k *KCP) Flush(ackOnly bool) uint32 {
+	return k.flush(ackOnly)
+}
+
 // NewKCP create a new kcp state machine
 //
 // 'conv' must be equal in the connection peers, or else data will be silently rejected.
