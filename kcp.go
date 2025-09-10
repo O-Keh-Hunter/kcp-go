@@ -25,7 +25,6 @@ package kcp
 import (
 	"container/heap"
 	"encoding/binary"
-	"sync/atomic"
 	"time"
 )
 
@@ -148,7 +147,7 @@ func (seg *segment) encode(ptr []byte) []byte {
 	ptr = ikcp_encode32u(ptr, seg.sn)
 	ptr = ikcp_encode32u(ptr, seg.una)
 	ptr = ikcp_encode32u(ptr, uint32(len(seg.data)))
-	atomic.AddUint64(&DefaultSnmp.OutSegs, 1)
+	// atomic.AddUint64(&DefaultSnmp.OutSegs, 1)
 	return ptr
 }
 
@@ -710,7 +709,7 @@ func (kcp *KCP) Input(data []byte, regular, ackNoDelay bool) int {
 				}
 			}
 			if regular && repeat {
-				atomic.AddUint64(&DefaultSnmp.RepeatSegs, 1)
+				// atomic.AddUint64(&DefaultSnmp.RepeatSegs, 1)
 			}
 		} else if cmd == IKCP_CMD_WASK {
 			// ready to send back IKCP_CMD_WINS in Ikcp_flush
@@ -725,7 +724,7 @@ func (kcp *KCP) Input(data []byte, regular, ackNoDelay bool) int {
 		inSegs++
 		data = data[length:]
 	}
-	atomic.AddUint64(&DefaultSnmp.InSegs, inSegs)
+	// atomic.AddUint64(&DefaultSnmp.InSegs, inSegs)
 
 	// update rtt with the latest ts
 	// ignore the FEC packet
@@ -782,11 +781,11 @@ func (kcp *KCP) wnd_unused() uint16 {
 
 // flush pending data
 func (kcp *KCP) flush(ackOnly bool) uint32 {
-	defer func() {
-		atomic.StoreUint64(&DefaultSnmp.RingBufferSndQueue, uint64(kcp.snd_queue.MaxLen()))
-		atomic.StoreUint64(&DefaultSnmp.RingBufferRcvQueue, uint64(kcp.rcv_queue.MaxLen()))
-		atomic.StoreUint64(&DefaultSnmp.RingBufferSndBuffer, uint64(kcp.snd_buf.MaxLen()))
-	}()
+	// defer func() {
+	// 	atomic.StoreUint64(&DefaultSnmp.RingBufferSndQueue, uint64(kcp.snd_queue.MaxLen()))
+	// 	atomic.StoreUint64(&DefaultSnmp.RingBufferRcvQueue, uint64(kcp.rcv_queue.MaxLen()))
+	// 	atomic.StoreUint64(&DefaultSnmp.RingBufferSndBuffer, uint64(kcp.snd_buf.MaxLen()))
+	// }()
 
 	var seg segment
 	seg.conv = kcp.conv
@@ -973,18 +972,18 @@ func (kcp *KCP) flush(ackOnly bool) uint32 {
 	// counter updates
 	sum := lostSegs
 	if lostSegs > 0 {
-		atomic.AddUint64(&DefaultSnmp.LostSegs, lostSegs)
+		// atomic.AddUint64(&DefaultSnmp.LostSegs, lostSegs)
 	}
 	if fastRetransSegs > 0 {
-		atomic.AddUint64(&DefaultSnmp.FastRetransSegs, fastRetransSegs)
+		// atomic.AddUint64(&DefaultSnmp.FastRetransSegs, fastRetransSegs)
 		sum += fastRetransSegs
 	}
 	if earlyRetransSegs > 0 {
-		atomic.AddUint64(&DefaultSnmp.EarlyRetransSegs, earlyRetransSegs)
+		// atomic.AddUint64(&DefaultSnmp.EarlyRetransSegs, earlyRetransSegs)
 		sum += earlyRetransSegs
 	}
 	if sum > 0 {
-		atomic.AddUint64(&DefaultSnmp.RetransSegs, sum)
+		// atomic.AddUint64(&DefaultSnmp.RetransSegs, sum)
 	}
 
 	// cwnd update
